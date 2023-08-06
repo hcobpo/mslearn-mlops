@@ -3,22 +3,20 @@
 import argparse
 import glob
 import os
-import mlflow
-
-# TO DO: import libraries
-from xgboost import XGBClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
 
 import pandas as pd
 
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+
+import mlflow
 
 
 # define functions
 def main(args):
-    # TO DO: enable autologing
-     mlflow.autolog()
+    # TO DO: enable autologging
+    mlflow.autolog()
+
     # read data
     df = get_csvs_df(args.training_data)
 
@@ -27,14 +25,6 @@ def main(args):
 
     # train model
     train_model(args.reg_rate, X_train, X_test, y_train, y_test)
-
-    model = XGBClassifier(use_label_encoder=False, eval_metric="logloss")
-    model.fit(X_train, y_train, eval_set=[(X_test, y_test)], verbose=False)
-
-    y_pred = model.predict(X_test)
-    accuracy = accuracy_score(y_test, y_pred)
-    return accuracy
-    # end of code
 
 
 def get_csvs_df(path):
@@ -47,17 +37,14 @@ def get_csvs_df(path):
 
 
 # TO DO: add function to split data
-
+# Define the split function
 def split_data(df):
-    X = df.drop('Y', axis=1).values
-    y = df['Y'].values
-
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=0)
-    data = {"train": {"X": X_train, "y": y_train},
-            "test": {"X": X_test, "y": y_test}}
-    return data
-    # end of function
+    # Extract features and laberls
+    X, y = df[['Pregnancies', 'PlasmaGlucose', 'DiastolicBloodPressure', 
+               'TricepsThickness', 'SerumInsulin', 'BMI', 'DiabetesPedigree',
+               'Age']].values, df['Diabetic'].values
+    # Split the dataset into training and test sets
+    return train_test_split(X, y, test_size=0.30, random_state=0)
 
 
 def train_model(reg_rate, X_train, X_test, y_train, y_test):
